@@ -1,0 +1,24 @@
+diff -urNp a/buildtools/Makefile b/buildtools/Makefile
+--- a/buildtools/Makefile	2018-09-24 11:36:56.173535757 +0200
++++ b/buildtools/Makefile	2018-09-24 11:40:09.537553859 +0200
+@@ -44,7 +44,7 @@ genfontc:%:%.o $(NETPBMLIB)
+ 	$(LD_FOR_BUILD) -o $@ $(LDFLAGS_FOR_BUILD)  $< $(NETPBMLIB)
+ 
+ $(BUILDPROGS):%:%.o
+-	$(LD_FOR_BUILD) -o $@ $(LDFLAGS_FOR_BUILD) $<
++	$(LD_FOR_BUILD) -o $@ $(LDFLAGSPRE) $<
+ 
+ distclean clean: cleanlocal
+ .PHONY: cleanlocal
+diff -urNp a/test/Makefile b/test/Makefile
+--- a/test/Makefile	2018-09-24 11:36:56.211535549 +0200
++++ b/test/Makefile	2018-09-24 12:40:56.440812065 +0200
+@@ -18,7 +18,7 @@ testrandom.o: testrandom.c
+ 	$(CC_FOR_BUILD) -c -o $@ $(CFLAGS_FOR_BUILD) $<
+ 
+ testrandom: testrandom.o
+-	$(LD_FOR_BUILD) -o $@ $(LDFLAGS_FOR_BUILD) $<
++	$(LD_FOR_BUILD) -o $@ $(LDFLAGSPRE) $<
+ 
+ RAND_VARIETY ?= $(shell ./testrandom -x)
+ 
