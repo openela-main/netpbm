@@ -1,0 +1,351 @@
+diff -urNp a/converter/other/fiasco/lib/error.c b/converter/other/fiasco/lib/error.c
+--- a/converter/other/fiasco/lib/error.c	2018-09-26 11:45:35.787418476 +0200
++++ b/converter/other/fiasco/lib/error.c	2018-09-27 08:35:35.051707228 +0200
+@@ -89,8 +89,10 @@ set_error(const char *format, ...) {
+         } else if (*str == 'c') {
+             (void)va_arg(args, int);
+             len += 1;
+-        } else
++        } else {
++            va_end(args);
+             return;
++        }
+         ++str;
+     }
+     va_end(args);
+@@ -204,8 +206,10 @@ warning (const char *format, ...)
+ 
+    VA_START (args, format);
+ 
+-   if (verboselevel == FIASCO_NO_VERBOSITY)
++   if (verboselevel == FIASCO_NO_VERBOSITY) {
++      va_end (args);
+       return;
++   }
+ 	
+    fprintf (stderr, "Warning: ");
+    vfprintf (stderr, format, args);
+@@ -224,8 +228,10 @@ message (const char *format, ...)
+ 
+    VA_START (args, format);
+ 
+-   if (verboselevel == FIASCO_NO_VERBOSITY)
++   if (verboselevel == FIASCO_NO_VERBOSITY) {
++      va_end(args);
+       return;
++   }
+ 
+    vfprintf (stderr, format, args);
+    fputc ('\n', stderr);
+@@ -242,8 +248,10 @@ debug_message (const char *format, ...)
+ 
+    VA_START (args, format);
+ 
+-   if (verboselevel < FIASCO_ULTIMATE_VERBOSITY)
++   if (verboselevel < FIASCO_ULTIMATE_VERBOSITY) {
++      va_end (args);
+       return;
++   }
+ 
+    fprintf (stderr, "*** ");
+    vfprintf (stderr, format, args);
+@@ -261,8 +269,10 @@ info (const char *format, ...)
+ 
+    VA_START (args, format);
+ 
+-   if (verboselevel == FIASCO_NO_VERBOSITY)
++   if (verboselevel == FIASCO_NO_VERBOSITY) {
++      va_end (args);
+       return;
++   }
+ 
+    vfprintf (stderr, format, args);
+    fflush (stderr);
+diff -urNp a/converter/other/gemtopnm.c b/converter/other/gemtopnm.c
+--- a/converter/other/gemtopnm.c	2018-09-26 11:45:35.791418469 +0200
++++ b/converter/other/gemtopnm.c	2018-09-27 08:36:51.058648634 +0200
+@@ -101,10 +101,11 @@ main(argc, argv)
+ 
+     if (planes == 1) 
+         type = PBM_TYPE;
+-    else 
++    else  
+         type = PPM_TYPE;
+ 
+-	pnm_writepnminit( stdout, cols, rows, MAXVAL, type, 0 );
++    pnm_writepnminit( stdout, cols, rows, MAXVAL, type, 0 );
++    
+ 
+     overflow_add(cols, padright);
+     { 
+diff -urNp a/converter/other/jbig/jbigtopnm.c b/converter/other/jbig/jbigtopnm.c
+--- a/converter/other/jbig/jbigtopnm.c	2018-09-26 11:45:35.779418489 +0200
++++ b/converter/other/jbig/jbigtopnm.c	2018-09-26 12:30:12.498686400 +0200
+@@ -279,6 +279,7 @@ int main (int argc, char **argv)
+     }
+   
+     pm_close(fout);
++    pm_close(fin);
+ 
+     jbg_dec_free(&s);
+ 
+diff -urNp a/converter/other/jbig/libjbig/jbig.c b/converter/other/jbig/libjbig/jbig.c
+--- a/converter/other/jbig/libjbig/jbig.c	2018-09-26 11:45:35.779418489 +0200
++++ b/converter/other/jbig/libjbig/jbig.c	2018-09-26 12:32:47.179520102 +0200
+@@ -887,7 +887,7 @@ void jbg_enc_options(struct jbg_enc_stat
+   if (order >= 0 && order <= 0x0f) s->order = order;
+   if (options >= 0) s->options = options;
+   if (l0 > 0) s->l0 = l0;
+-  if (mx >= 0 && my < 128) s->mx = mx;
++  if (mx >= 0 && mx < 128) s->mx = mx;
+   if (my >= 0 && my < 256) s->my = my;
+ 
+   return;
+diff -urNp a/converter/other/jpeg2000/jpeg2ktopam.c b/converter/other/jpeg2000/jpeg2ktopam.c
+--- a/converter/other/jpeg2000/jpeg2ktopam.c	2018-09-26 11:45:35.774418498 +0200
++++ b/converter/other/jpeg2000/jpeg2ktopam.c	2018-09-26 12:47:13.369571321 +0200
+@@ -135,11 +135,11 @@ readJ2k(const char *   const inputFilena
+ 
+     jasperP = jas_image_decode(instreamP, jas_image_getfmt(instreamP),
+                                (char*)options);
+-    if (jasperP == NULL)
++    if (jasperP == NULL) {
+         pm_error("Unable to interpret JPEG-2000 input.  "
+                  "The Jasper library jas_image_decode() subroutine failed.");
+-
+-	jas_stream_close(instreamP);
++    }
++    jas_stream_close(instreamP);
+ 
+     *jasperPP = jasperP;
+ }
+diff -urNp a/converter/other/jpeg2000/libjasper/jpc/jpc_util.c b/converter/other/jpeg2000/libjasper/jpc/jpc_util.c
+--- a/converter/other/jpeg2000/libjasper/jpc/jpc_util.c	2018-09-26 11:45:35.774418498 +0200
++++ b/converter/other/jpeg2000/libjasper/jpc/jpc_util.c	2018-09-26 12:50:30.121353853 +0200
+@@ -151,7 +151,7 @@ int jpc_atoaf(const char *s, int *numval
+ 	if ((cp = strtok(buf, delim))) {
+ 		++n;
+ 		while ((cp = strtok(0, delim))) {
+-			if (cp != '\0') {
++			if (*cp != '\0') {
+ 				++n;
+ 			}
+ 		}
+@@ -169,7 +169,7 @@ int jpc_atoaf(const char *s, int *numval
+ 			vs[n] = atof(cp);
+ 			++n;
+ 			while ((cp = strtok(0, delim))) {
+-				if (cp != '\0') {
++				if (*cp != '\0') {
+ 					vs[n] = atof(cp);
+ 					++n;
+ 				}
+diff -urNp a/converter/other/jpeg2000/pamtojpeg2k.c b/converter/other/jpeg2000/pamtojpeg2k.c
+--- a/converter/other/jpeg2000/pamtojpeg2k.c	2018-09-26 11:45:35.774418498 +0200
++++ b/converter/other/jpeg2000/pamtojpeg2k.c	2018-09-26 12:52:06.202247510 +0200
+@@ -355,7 +355,7 @@ convertToJasperImage(struct pam *   cons
+                                   JAS_IMAGE_CT_COLOR(JAS_IMAGE_CT_RGB_B));
+         }
+     } else {
+-        if (strncmp(inpamP->tuple_type, "GRAYSCALE", 9 == 0) ||
++        if (strncmp(inpamP->tuple_type, "GRAYSCALE", 9) == 0 ||
+             strncmp(inpamP->tuple_type, "BLACKANDWHITE", 13) == 0) {
+             jas_image_setclrspc(jasperP, JAS_CLRSPC_GENGRAY);
+             jas_image_setcmpttype(jasperP, 0,
+diff -urNp a/converter/pbm/pbmtoln03.c b/converter/pbm/pbmtoln03.c
+--- a/converter/pbm/pbmtoln03.c	2018-09-26 11:45:35.769418507 +0200
++++ b/converter/pbm/pbmtoln03.c	2018-09-26 13:15:36.205121268 +0200
+@@ -80,22 +80,25 @@ output_sixel_record (unsigned char * rec
+             /* Do an encoding */
+             record[j++] = '!' ;
+             sprintf (repeated_str, "%d", i - start_repeat) ;
+-            for (p = repeated_str ; *p ; p++)
++            for (p = repeated_str ; *p ; p++) {
+                record[j++] = *p ;
+-               record[j++] = last_char ; }
++            }
++            record[j++] = last_char ; 
+ 
+-         else {
++         } else {
+             for (k = 0 ; k < repeated ; k++)
+-               record[j++] = last_char ; }
++               record[j++] = last_char ; 
++         }
+ 
+          start_repeat = i ;
+-         last_char = record[i] ; }
++         last_char = record[i] ; 
+       }
++   }
+ 
+    fwrite ((char *) record, j, 1, stdout) ;
+    putchar ('-') ;      /* DECGNL (graphics new-line) */
+    putchar ('\n') ;
+-   }
++}
+ 
+ 
+ static void 
+diff -urNp a/converter/pbm/pbmtomacp.c b/converter/pbm/pbmtomacp.c
+--- a/converter/pbm/pbmtomacp.c	2018-09-26 11:45:35.769418507 +0200
++++ b/converter/pbm/pbmtomacp.c	2018-09-26 14:47:55.085913872 +0200
+@@ -177,7 +177,7 @@ calculateCropPad(struct CmdlineInfo
+             pm_message("Specified -bottom value %u is beyond edge of "
+                        "input image", cmdline.bottom);
+ 
+-            bottom = MIN3(cmdline.bottom, rows - 1, top + MACP_ROWS - 1);
++        bottom = MIN3(cmdline.bottom, rows - 1, top + MACP_ROWS - 1);
+     } else
+         bottom = MIN(rows - 1, top + MACP_ROWS - 1);
+ 
+diff -urNp a/converter/pbm/pbmtoppa/pbm.c b/converter/pbm/pbmtoppa/pbm.c
+--- a/converter/pbm/pbmtoppa/pbm.c	2018-09-26 11:45:35.769418507 +0200
++++ b/converter/pbm/pbmtoppa/pbm.c	2018-09-26 14:49:51.956959516 +0200
+@@ -12,6 +12,7 @@
+ #include <stdlib.h>
+ #include <string.h>
+ 
++#include "ppm.h"
+ #include "ppapbm.h"
+ 
+ int make_pbm_stat(pbm_stat* pbm,FILE* fptr)
+diff -urNp a/converter/ppm/pjtoppm.c b/converter/ppm/pjtoppm.c
+--- a/converter/ppm/pjtoppm.c	2018-09-26 11:45:35.797418458 +0200
++++ b/converter/ppm/pjtoppm.c	2018-09-26 14:52:41.300937179 +0200
+@@ -11,6 +11,7 @@
+ */
+ 
+ #include "ppm.h"
++#include "pm.h"
+ #include "mallocvar.h"
+ 
+ static char usage[] =  "[paintjetfile]";
+diff -urNp a/converter/ppm/ppmtomitsu.c b/converter/ppm/ppmtomitsu.c
+--- a/converter/ppm/ppmtomitsu.c	2018-09-26 11:45:35.797418458 +0200
++++ b/converter/ppm/ppmtomitsu.c	2018-09-26 14:56:09.837804961 +0200
+@@ -651,9 +651,10 @@ main(int argc, char * argv[]) {
+         dpi300 = TRUE;
+     else if (pm_keymatch(argv[argn], "-tiny", 2))
+         tiny = TRUE;
+-    else
++    else 
+         pm_usage(usage);
+-        ++argn;
++
++    ++argn;   
+     }
+ 
+     if (argn < argc) {
+diff -urNp a/converter/ppm/tgatoppm.c b/converter/ppm/tgatoppm.c
+--- a/converter/ppm/tgatoppm.c	2018-09-26 11:45:35.795418462 +0200
++++ b/converter/ppm/tgatoppm.c	2018-09-26 15:03:12.084322787 +0200
+@@ -168,8 +168,8 @@ get_pixel(FILE * const ifP, pixel * dest
+ 	Red = getbyte( ifP );
+ 	if ( Size == 32 )
+ 	    Alpha = getbyte( ifP );
+-    else
+-        Alpha = 0;
++        else
++            Alpha = 0;
+ 	l = 0;
+ 	break;
+ 
+diff -urNp a/converter/ppm/xpmtoppm.c b/converter/ppm/xpmtoppm.c
+--- a/converter/ppm/xpmtoppm.c	2018-09-26 11:45:35.795418462 +0200
++++ b/converter/ppm/xpmtoppm.c	2018-09-26 15:09:39.763747185 +0200
+@@ -941,8 +941,8 @@ convertRaster(FILE *                cons
+         if (imageOutFileP)
+             ppm_writeppmrow(imageOutFileP, 
+                             pixrow, cols, PPM_MAXMAXVAL, 0);
+-            if (alphaOutFileP)
+-                pbm_writepbmrow(alphaOutFileP, alpharow, cols, 0);
++        if (alphaOutFileP)
++            pbm_writepbmrow(alphaOutFileP, alpharow, cols, 0);
+     }
+ 
+     pbm_freerow(alpharow);
+diff -urNp a/editor/pnmconvol.c b/editor/pnmconvol.c
+--- a/editor/pnmconvol.c	2018-09-26 11:45:35.758418526 +0200
++++ b/editor/pnmconvol.c	2018-09-26 15:25:06.963058646 +0200
+@@ -733,7 +733,7 @@ parsePlaneFileLine(const char *   const
+                          "-matrix value is not a valid floating point "
+                          "number", colCt, line);
+ 
+-                ++colCt;
++            ++colCt;
+         }
+         pm_strfree(token);
+     }
+diff -urNp a/generator/pbmtext.c b/generator/pbmtext.c
+--- a/generator/pbmtext.c	2018-09-26 11:45:35.727418580 +0200
++++ b/generator/pbmtext.c	2018-09-26 15:29:14.618407929 +0200
+@@ -404,7 +404,7 @@ fixControlChars(const PM_WCHAR  * const
+                 output[outCursor++] = L' ';
+         } else if (currentChar > fontP->maxglyph ||
+                    !fontP->glyph[currentChar]) {
+-        if (currentChar > PM_FONT2_MAXGLYPH)
++        if (currentChar > PM_FONT2_MAXGLYPH){
+             pm_message("code point %X is beyond what this program "
+                        "can handle.  Max=%X",
+                        (unsigned int)currentChar, PM_FONT2_MAXGLYPH);
+@@ -420,15 +420,15 @@ fixControlChars(const PM_WCHAR  * const
+                                (unsigned int) currentChar );
+                 output[outCursor++] = ' ';
+             }
++        }
+         } else
+             output[outCursor++] = input[inCursor];
+-
++        
+         assert(outCursor <= outputSize);
+     }
+     output[outCursor++] = L'\0';
+ 
+     assert(outCursor <= outputSize);
+-
+     *outputP = output;
+ }
+ 
+diff -urNp a/lib/libpm.c b/lib/libpm.c
+--- a/lib/libpm.c	2018-09-26 11:45:35.768418509 +0200
++++ b/lib/libpm.c	2018-09-27 08:20:50.933203723 +0200
+@@ -437,9 +437,10 @@ pm_maxvaltobits(int const maxval) {
+         return 15;
+     else if ( (long) maxval <= 65535L )
+         return 16;
+-    else
++    else {
+         pm_error( "maxval of %d is too large!", maxval );
+         return -1;  /* Should never come here */
++    }
+ }
+ 
+ int
+diff -urNp a/other/pamfix.c b/other/pamfix.c
+--- a/other/pamfix.c	2018-09-26 11:45:35.755418531 +0200
++++ b/other/pamfix.c	2018-09-27 08:23:00.923166374 +0200
+@@ -184,7 +184,7 @@ clipPamRow(const struct pam * const pamP
+                                "image maxval of %lu",
+                                row, col, plane, tuplerow[col][plane],
+                                pamP->maxval);
+-	            tuplerow[col][plane] = pamP->maxval;
++	        tuplerow[col][plane] = pamP->maxval;
+             }
+         }
+     }
+diff -urNp a/other/pnmcolormap.c b/other/pnmcolormap.c
+--- a/other/pnmcolormap.c	2018-09-26 11:45:35.756418529 +0200
++++ b/other/pnmcolormap.c	2018-09-27 08:28:57.053986251 +0200
+@@ -838,9 +838,10 @@ colormapToSquare(struct pam * const pamP
+         unsigned int const intsqrt = (int)sqrt((float)colormap.size);
+         if (intsqrt * intsqrt == colormap.size) 
+             pamP->width = intsqrt;
+-        else 
++        else { 
+             pamP->width = intsqrt + 1;
+             overflow_add(intsqrt, 1);
++        }
+     }
+     {
+         unsigned int const intQuotient = colormap.size / pamP->width;
