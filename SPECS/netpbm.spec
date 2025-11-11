@@ -1,7 +1,7 @@
 Summary:         A library for handling different graphics file formats
 Name:            netpbm
 Version:         10.95.00
-Release:         2%{?dist}
+Release:         3%{?dist}
 # See copyright_summary for details
 License:         BSD and GPLv2 and IJG and MIT and Public Domain
 URL: http://netpbm.sourceforge.net/
@@ -24,12 +24,11 @@ Patch9:          netpbm-xwdfix.patch
 Patch10:         netpbm-multilib.patch
 Patch11:         netpbm-glibc.patch
 Patch12:         netpbm-docfix.patch
-Patch13:         netpbm-cmuwtopbm.patch
-Patch14:         netpbm-pamtojpeg2k.patch
-Patch15:         netpbm-manfix.patch
-Patch16:         netpbm-jasper.patch
-Patch17:         netpbm-libdir-so.patch
-Patch18:         netpbm-test.patch
+Patch13:         netpbm-pamtojpeg2k.patch
+Patch14:         netpbm-manfix.patch
+Patch15:         netpbm-jasper.patch
+Patch16:         netpbm-libdir-so.patch
+Patch17:         netpbm-test.patch
 
 BuildRequires: make
 BuildRequires:   libjpeg-devel, libpng-devel, libtiff-devel, flex, gcc, jbigkit-devel
@@ -229,6 +228,9 @@ popd
 %doc userguide/*
 
 %changelog
+* Thu Jul 17 2025 Josef Ridky <jridky@redhat.com> - 10.95.00-3
+- remove broken patch (RHEL-23298)
+
 * Tue Aug 17 2021 Josef Ridky <jridky@redhat.com> - 10.95.00-2
 - add gating.yaml file
 
