@@ -1,7 +1,7 @@
 Summary:         A library for handling different graphics file formats
 Name:            netpbm
 Version:         10.82.00
-Release:         7%{?dist}
+Release:         10%{?dist}
 # See copyright_summary for details
 License:         BSD and GPLv2 and IJG and MIT and Public Domain
 URL: http://netpbm.sourceforge.net/
@@ -31,9 +31,14 @@ Patch15:         netpbm-pamtojpeg2k.patch
 Patch16:         netpbm-manfix.patch
 Patch17:         netpbm-manual-pages.patch
 Patch18:         netpbm-annocheck.patch
-Patch19:	 netpbm-jasper.patch
-Patch20:	 netpbm-covscan.patch
-Patch21:	 netpbm-lib.patch
+Patch19:    	 netpbm-jasper.patch
+Patch20:	     netpbm-covscan.patch
+Patch21:	     netpbm-lib.patch
+# https://github.com/jwilk-mirrors/netpbm/commit/61bcb73d43ecc0a4aa60fa252e7d56f8f5f74243
+Patch22:         netpbm-CVE-2026-120432.patch
+# https://github.com/jwilk-mirrors/netpbm/commit/8ef4f59ac6b0f8801a84c7402f0df250df68f1a3
+Patch23:         netpbm-CVE-2026-120433.patch
+Patch24:         netpbm-CVE-2026-120436.patch
 
 BuildRequires:   libjpeg-devel, libpng-devel, libtiff-devel, flex, jbigkit-devel
 BuildRequires:   libX11-devel, perl-generators, python3, jasper-devel, libxml2-devel
@@ -234,6 +239,16 @@ popd
 %doc userguide/*
 
 %changelog
+* Mon Nov 09 2026 Josef Ridky <jridky@redhat.com> - 10.82.00-10
+- fix CVE-2026-120436
+
+* Mon Nov 02 2026 RHEL Packaging Agent <redhat-ymir-agent@redhat.com> - 10.82.00-9
+- CVE-2026-120433 netpbm: netpbm: Arbitrary code execution via crafted PICT
+  file in picttoppm
+
+* Mon Nov 02 2026 RHEL Packaging Agent <redhat-ymir-agent@redhat.com> - 10.82.00-8
+- CVE-2026-120432 netpbm: netpbm: Arbitrary code execution via integer overflow in winicontopam
+
 * Thu Jan 27 2022 Josef Ridky <jridky@redhat.com> - 10.82.00-7
 - fix libnetpbm library issue (#2029118)
 
