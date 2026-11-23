@@ -1,7 +1,7 @@
 Summary:         A library for handling different graphics file formats
 Name:            netpbm
 Version:         11.09.00
-Release:         1%{?dist}
+Release:         1%{?dist}.3
 # See copyright_summary for details
 License:         BSD-3-Clause AND GPL-2.0-only AND LGPL-2.1-or-later AND GPL-3.0-or-later AND IJG AND MIT AND NTP AND PostgreSQL AND LicenseRef-MIT-CRL-Xim AND LicenseRef-Fedora-Public-Domain
 URL: http://netpbm.sourceforge.net/
@@ -29,6 +29,12 @@ Patch15:         netpbm-jasper.patch
 Patch16:         netpbm-libdir-so.patch
 Patch17:         netpbm-c99.patch
 Patch18:         netpbm-shlib-ldflags.patch
+# https://github.com/jwilk-mirrors/netpbm/commit/61bcb73d43ecc0a4aa60fa252e7d56f8f5f74243
+Patch19:         netpbm-CVE-2026-120432.patch
+# https://sourceforge.net/p/netpbm/code/5328/
+Patch20:         netpbm-CVE-2026-120433.patch
+# https://github.com/leahneukirchen/netpbm-mirror/commit/bc9a0997379be574458df7150639129c1e4df481
+Patch21:         netpbm-CVE-2026-120436.patch
 
 BuildRequires:   make
 BuildRequires:   libjpeg-devel, libpng-devel, libtiff-devel, flex, gcc, jbigkit-devel
@@ -229,6 +235,17 @@ popd
 %doc userguide/*
 
 %changelog
+* Mon Nov 02 2026 RHEL Packaging Agent <redhat-ymir-agent@redhat.com> - 11.09.00-1.3
+- CVE-2026-120436 netpbm: netpbm: Arbitrary code execution via integer
+  overflow in jbigtopnm
+
+* Mon Nov 02 2026 RHEL Packaging Agent <redhat-ymir-agent@redhat.com> - 11.09.00-1.2
+- CVE-2026-120433 netpbm: netpbm: Arbitrary code execution via crafted
+  PICT file in picttoppm
+
+* Mon Nov 02 2026 RHEL Packaging Agent <redhat-ymir-agent@redhat.com> - 11.09.00-1.1
+- CVE-2026-120432 netpbm: netpbm: Arbitrary code execution via integer overflow in winicontopam
+
 * Thu Feb 06 2025 Josef Ridky <jridky@redhat.com> - 11.09.00-1
 - New upstream release 11.09.00 
 - Review and update license field (RHEL-64359)
